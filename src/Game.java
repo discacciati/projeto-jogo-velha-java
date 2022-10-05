@@ -1,75 +1,69 @@
 import java.util.Arrays;
+import java.util.InputMismatchException;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 public class Game {
     public static void main(String[] args) {
-        int[] score = {1, 0};
+        String[][] gameBoard = newGameBoard();
+        String[] names = getNames();
         String[] playerSymbol = {"X", "O"};
-        String[] names = {"", ""};
-        int turn = 0;   //player 1 starts the game
+        int[] score = {0, 0};
         boolean keepPlaying = true;
-        String[][] gameBoard = createGameBoard();
 
-        for(String[] mark: gameBoard){
-            System.out.println(mark);
-        }
-
-        //getNames(names);
-        //instructions();
+        instructions();
 
         while(keepPlaying){
-            turn = 0;
-            play(turn, playerSymbol, score, names, gameBoard);
-            if (winLineFound(gameBoard)){
-                winRound(names, score, turn);
-                resetGameBoard(gameBoard);
-                if (wishesToKeepPlaying())
-                    resetGameBoard(gameBoard);
-                else
-                    keepPlaying = false;
-            }
-
-            turn = 1;
-            play(turn, playerSymbol, score, names, gameBoard);
-            if (winLineFound(gameBoard)){
-                winRound(names, score, turn);
-                resetGameBoard(gameBoard);
-                if (wishesToKeepPlaying())
-                    resetGameBoard(gameBoard);
-                else
-                    keepPlaying = false;
+            int[] turns = {0, 1};
+            for(int turn: turns){
+                play(turn, playerSymbol, score, names, gameBoard);
+                if (winLineFound(gameBoard)){
+                    winRound(names, score, turn);
+                    writeBoard(names, score, gameBoard);
+                    gameBoard = newGameBoard(); //reset gameBoard
+                    if (wishesToKeepPlaying()){
+                        clearConsole();
+                        instructions();
+                    }
+                    else{
+                        System.out.println("Obrigada por jogar!");
+                        keepPlaying = false;
+                        break;
+                    }
+                }
             }
         }
     }
 
-    private static String[][] createGameBoard(){
+    private static String[][] newGameBoard(){
         String[][] gameBoard = new String[3][3];
         for (String[] row: gameBoard)
             Arrays.fill(row, " ");
         return gameBoard;
     }
 
-    private static void getNames(String[] names){
+    private static String[] getNames(){
         System.out.println(" __________________________________________ ");
         System.out.println("|                                          |");
         System.out.println("|             JOGO DA VELHA                |");
         System.out.println("|__________________________________________|");
         System.out.println();
 
+        String[] names = {"", ""};
         Scanner sc = new Scanner(System.in);
         System.out.print("Digite o nome do jogador 1: ");
         names[0]= sc.nextLine();
-        System.out.println("Bem-vinde "+ names[0] + ", você será o X .");
-        System.out.println();
+        System.out.println("Bem-vinde "+ names[0] + ", você joga como \"X\"\n");
+
         System.out.print("Digite o nome do jogador 2: ");
         names[1] = sc.nextLine();
-        System.out.println("Bem-vinde "+ names[1] + ", você será o 0 .");
-        sc.close();
+        System.out.println("Bem-vinde "+ names[1] + ", você joga como \"O\"\n");
+        //sc.close();
+        return names;
     };
 
     private static void instructions(){
-        System.out.println();
+        System.out.println("********** INSTRUÇÕES ***********");
         System.out.println(" _____ _____ _____ ");
         System.out.println("|     |     |     |");
         System.out.println("|  1  |  2  |  3  |");
@@ -81,130 +75,167 @@ public class Game {
         System.out.println("|  7  |  8  |  9  |");
         System.out.println("|_____|_____|_____|");
         System.out.println();
-        System.out.println("Você deverá escolher uma das posições acima para definir sua jogada no tabuleiro");
+        System.out.println("Você deverá escolher uma das posições acima para definir sua jogada no tabuleiro\n");
     }
 
-    private static void writeBoard(int turn, String[] names, int[] score, String[][] gameBoard){
-        System.out.println(" _____ _____ _____ ");
-        System.out.println("|     |     |     |");
-        System.out.printf("|  %s  |  %s  |  %s  |\n", gameBoard[0][0], gameBoard[0][1], gameBoard[0][2]);
-        System.out.println("|_____|_____|_____|");
-        System.out.println("|     |     |     |");
-        System.out.printf("|  %s  |  %s  |  %s  |\n", gameBoard[1][0], gameBoard[1][1], gameBoard[1][2]);
-        System.out.println("|_____|_____|_____|");
-        System.out.println("|     |     |     |");
-        System.out.printf("|  %s  |  %s  |  %s  |\n", gameBoard[2][0], gameBoard[2][1], gameBoard[2][2]);
-        System.out.println("|_____|_____|_____|");
+    private static void writeBoard(String[] names, int[] score, String[][] gameBoard){
+        System.out.println("     |     |     ");
+        System.out.printf("  %s  |  %s  |  %s \n", gameBoard[0][0], gameBoard[0][1], gameBoard[0][2]);
+        System.out.println("_____|_____|_____");
+        System.out.println("     |     |     ");
+        System.out.printf("  %s  |  %s  |  %s \n", gameBoard[1][0], gameBoard[1][1], gameBoard[1][2]);
+        System.out.println("_____|_____|_____");
+        System.out.println("     |     |     ");
+        System.out.printf("  %s  |  %s  |  %s \n", gameBoard[2][0], gameBoard[2][1], gameBoard[2][2]);
+        System.out.println("     |     |     ");
         System.out.println();
 
         System.out.println("_________________________________ ");
         System.out.println("             PLACAR             ");
-        System.out.printf("   %s  %d  x  %d  %s    \n", names[0], score[0], score[1], names[1]);
+        System.out.printf("     %s  %d  x  %d  %s    \n", names[0], score[0], score[1], names[1]);
         System.out.println("_________________________________");
         System.out.println();
-
     };
 
-    private static void pickPosition(int turn, String[] playerSymbol, String[] names, String[][] gameBoard){
+    private static int pickPosition(String name){
+        System.out.print(name + ", digite o número da posição escolhida: ");
         Scanner sc = new Scanner(System.in);
-        System.out.print(names[turn] + ", digite o número da posição escolhida: ");
-        int position = 0;
+        int position;
         try{
             position = sc.nextInt();
         }
-        catch (NoSuchElementException e){
+        catch (InputMismatchException e){
             System.out.println("Opção inválida, você deve digitar um número inteiro entre 1 e 9.");
-            pickPosition(turn, playerSymbol, names, gameBoard);
+            return pickPosition(name);
         }
-        switch(position){
-            case 1:
-                if (gameBoard[0][0].equals(" "))
-                    gameBoard[0][0] = playerSymbol[turn];
-                break;
-            case 2:
-                if (gameBoard[0][1].equals(" "))
-                    gameBoard[0][1] = playerSymbol[turn];
-                break;
-            case 3:
-                if (gameBoard[0][2].equals(" "))
-                    gameBoard[0][2] = playerSymbol[turn];
-                break;
-            case 4:
-                if (gameBoard[1][0].equals(" "))
-                    gameBoard[1][0] = playerSymbol[turn];
-                break;
-            case 5:
-                if (gameBoard[1][1].equals(" "))
-                    gameBoard[1][1] = playerSymbol[turn];
-                break;
-            case 6:
-                if (gameBoard[1][2].equals(" "))
-                    gameBoard[1][2] = playerSymbol[turn];
-                break;
-            case 7:
-                if (gameBoard[2][0].equals(" "))
-                    gameBoard[2][0] = playerSymbol[turn];
-                break;
-            case 8:
-                if (gameBoard[2][1].equals(" "))
-                    gameBoard[2][1] = playerSymbol[turn];
-                break;
-            case 9:
-                if (gameBoard[2][2].equals(" "))
-                    gameBoard[2][2] = playerSymbol[turn];
-                break;
-            default:
-                System.out.print("Posição inválida, escolha um número inteiro entre 1 e 9.");
-                pickPosition(turn, playerSymbol, names, gameBoard);
-                break;
+        if(position < 1 || position > 9){
+            System.out.println("Você não escolheu um número inteiro entre 1 e 9, por favor escolha novamente.");
+            return pickPosition(name);
         }
-   sc.close();
-
+        return position;
     }
 
     private static boolean winLineFound(String[][] gameBoard){
-        if(gameBoard[0][0] == gameBoard[1][1] && gameBoard[1][1] == gameBoard[2][2]) //check diagonal strike
+        if(gameBoard[0][0] == gameBoard[1][1] && gameBoard[1][1] == gameBoard[2][2] && gameBoard[1][1] != " ") //check diagonal strike
             return true;
-        if(gameBoard[2][0] == gameBoard[1][1] && gameBoard[1][1] == gameBoard[0][2]) //check diagonal strike
+        if(gameBoard[2][0] == gameBoard[1][1] && gameBoard[1][1] == gameBoard[0][2] && gameBoard[1][1] != " ") //check diagonal strike
             return true;
         for(int i = 0; i <= 2; i++){
-            if(gameBoard[i][0] == gameBoard[i][1] && gameBoard[i][1] == gameBoard[i][2])  //check horizontal strike
+            if(gameBoard[i][0] == gameBoard[i][1] && gameBoard[i][1] == gameBoard[i][2] && gameBoard[i][1] != " ")  //check horizontal strike
                 return true;
-            if(gameBoard[0][i] == gameBoard[1][i] && gameBoard[1][1] == gameBoard[2][i])  //check vertical strike
+            if(gameBoard[0][i] == gameBoard[1][i] && gameBoard[1][i] == gameBoard[2][i] && gameBoard[1][i] != " ")  //check vertical strike
                 return true;
         }
         return false;
     }
 
     private static void winRound(String[] names, int[] score, int turn){
-        System.out.println(names[turn] + " ganhou esta rodada!!!");
+        System.out.println("*********** " + names[turn] + " ganhou esta rodada!!! ***********");
         score[turn]++;
-    }
-
-    private static void resetGameBoard(String[][] gameBoard){
-        gameBoard = createGameBoard();
     }
 
     private static boolean wishesToKeepPlaying(){
         Scanner sc = new Scanner(System.in);
         System.out.print("Deseja continuar o jogo? S ou N: ");
         String answer = sc.nextLine();
-        sc.close();
-        if(answer.toLowerCase().equals("s"))
+        if(answer.equalsIgnoreCase("s"))
             return true;
-        else if(answer.toLowerCase().equals("n"))
+        else if(answer.equalsIgnoreCase("n")){
             return false;
+        }
         else {
             System.out.println("Você precisa digitar a letra \"s\" ou a letra \"n\".");
             return wishesToKeepPlaying();
         }
     }
 
-
     private static void play(int turn, String[] playerSymbol, int[] score, String[] names, String[][] gameBoard){
-        pickPosition(turn, playerSymbol, names, gameBoard);
+        int position = pickPosition(names[turn]);
+        String symbol = playerSymbol[turn];
+        placePick(symbol, position, gameBoard);
         clearConsole();
-        writeBoard(turn, names, score, gameBoard);
+        writeBoard(names, score, gameBoard);
+    }
+
+    private static void placePick(String symbol, int position, String[][] gameBoard) {
+        switch(position){
+            case 1:
+                if (gameBoard[0][0].equals(" "))
+                    gameBoard[0][0] = symbol;
+                else{
+                    System.out.print("Posição já escolhida, tente novamente: ");
+                    placePick(symbol, position, gameBoard);
+                }
+                break;
+            case 2:
+                if (gameBoard[0][1].equals(" "))
+                    gameBoard[0][1] = symbol;
+                else{
+                    System.out.print("Posição já escolhida, tente novamente: ");
+                    placePick(symbol, position, gameBoard);
+                }
+                break;
+            case 3:
+                if (gameBoard[0][2].equals(" "))
+                    gameBoard[0][2] = symbol;
+                else{
+                    System.out.print("Posição já escolhida, tente novamente: ");
+                    placePick(symbol, position, gameBoard);
+                }
+                break;
+            case 4:
+                if (gameBoard[1][0].equals(" "))
+                    gameBoard[1][0] = symbol;
+                else{
+                    System.out.print("Posição já escolhida, tente novamente: ");
+                    placePick(symbol, position, gameBoard);
+                }
+                break;
+            case 5:
+                if (gameBoard[1][1].equals(" "))
+                    gameBoard[1][1] = symbol;
+                else{
+                    System.out.print("Posição já escolhida, tente novamente: ");
+                    placePick(symbol, position, gameBoard);
+                }
+                break;
+            case 6:
+                if (gameBoard[1][2].equals(" "))
+                    gameBoard[1][2] = symbol;
+                else{
+                    System.out.print("Posição já escolhida, tente novamente: ");
+                    placePick(symbol, position, gameBoard);
+                }
+                break;
+            case 7:
+                if (gameBoard[2][0].equals(" "))
+                    gameBoard[2][0] = symbol;
+                else{
+                    System.out.print("Posição já escolhida, tente novamente: ");
+                    placePick(symbol, position, gameBoard);
+                }
+                break;
+            case 8:
+                if (gameBoard[2][1].equals(" "))
+                    gameBoard[2][1] = symbol;
+                else{
+                    System.out.print("Posição já escolhida, tente novamente: ");
+                    placePick(symbol, position, gameBoard);
+                }
+                break;
+            case 9:
+                if (gameBoard[2][2].equals(" "))
+                    gameBoard[2][2] = symbol;
+                else{
+                    System.out.print("Posição já escolhida, tente novamente: ");
+                    placePick(symbol, position, gameBoard);
+                }
+                break;
+            default:
+                //no default, input mismatches were handled in the pickPosition method
+                break;
+        }
+
     }
 
     public static void clearConsole() {
@@ -226,6 +257,7 @@ public class Game {
         }
     }
 }
+
 
 
 

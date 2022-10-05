@@ -15,12 +15,19 @@ public class Game {
 
         while(keepPlaying){
             int[] turns = {0, 1};
+            boolean endRound = false;
             for(int turn: turns){
                 play(turn, playerSymbol, score, names, gameBoard);
                 if (winLineFound(gameBoard)){
                     winRound(names, score, turn);
+                    endRound = true;
+                } else if(draw(gameBoard)){
+                    System.out.println("Houve um empate, nenhum jogador ganhou a rodada.");
+                    endRound = true;
+                }
+                if (endRound){
                     writeBoard(names, score, gameBoard);
-                    gameBoard = newGameBoard(); //reset gameBoard
+                    gameBoard = newGameBoard();  //reset gameBoard
                     if (wishesToKeepPlaying()){
                         clearConsole();
                         instructions();
@@ -151,10 +158,68 @@ public class Game {
 
     private static void play(int turn, String[] playerSymbol, int[] score, String[] names, String[][] gameBoard){
         int position = pickPosition(names[turn]);
+        while(!positionAvailable(position, gameBoard)){
+            System.out.print("Posição não disponível, jogue novamente.");
+            position = pickPosition(names[turn]);
+        }
         String symbol = playerSymbol[turn];
         placePick(symbol, position, gameBoard);
         clearConsole();
         writeBoard(names, score, gameBoard);
+    }
+
+    private static boolean draw(String[][] gameBoard){
+        for (int i = 0; i <= 2; i++){
+            for (int j = 0; j <= 2; j++){
+                if(gameBoard[i][j].equals(" "))
+                    return false;
+            }
+        }
+        return true;
+    }
+
+    private static boolean positionAvailable(int position, String[][] gameBoard){
+        switch(position){
+            case 1:
+                if (!gameBoard[0][0].equals(" "))
+                    return false;
+                break;
+            case 2:
+                if (!gameBoard[0][1].equals(" "))
+                    return false;
+                break;
+            case 3:
+                if (!gameBoard[0][2].equals(" "))
+                    return false;
+                break;
+            case 4:
+                if (!gameBoard[1][0].equals(" "))
+                    return false;
+                break;
+            case 5:
+                if (!gameBoard[1][1].equals(" "))
+                    return false;
+                break;
+            case 6:
+                if (!gameBoard[1][2].equals(" "))
+                    return false;
+                break;
+            case 7:
+                if (!gameBoard[2][0].equals(" "))
+                    return false;
+                break;
+            case 8:
+                if (!gameBoard[2][1].equals(" "))
+                    return false;
+                break;
+            case 9:
+                if (!gameBoard[2][2].equals(" "))
+                    return false;
+                break;
+            default:
+                    return true;
+        }
+        return true;
     }
 
     private static void placePick(String symbol, int position, String[][] gameBoard) {
@@ -162,80 +227,43 @@ public class Game {
             case 1:
                 if (gameBoard[0][0].equals(" "))
                     gameBoard[0][0] = symbol;
-                else{
-                    System.out.print("Posição já escolhida, tente novamente: ");
-                    placePick(symbol, position, gameBoard);
-                }
                 break;
             case 2:
                 if (gameBoard[0][1].equals(" "))
                     gameBoard[0][1] = symbol;
-                else{
-                    System.out.print("Posição já escolhida, tente novamente: ");
-                    placePick(symbol, position, gameBoard);
-                }
                 break;
             case 3:
                 if (gameBoard[0][2].equals(" "))
                     gameBoard[0][2] = symbol;
-                else{
-                    System.out.print("Posição já escolhida, tente novamente: ");
-                    placePick(symbol, position, gameBoard);
-                }
                 break;
             case 4:
                 if (gameBoard[1][0].equals(" "))
                     gameBoard[1][0] = symbol;
-                else{
-                    System.out.print("Posição já escolhida, tente novamente: ");
-                    placePick(symbol, position, gameBoard);
-                }
                 break;
             case 5:
                 if (gameBoard[1][1].equals(" "))
                     gameBoard[1][1] = symbol;
-                else{
-                    System.out.print("Posição já escolhida, tente novamente: ");
-                    placePick(symbol, position, gameBoard);
-                }
                 break;
             case 6:
                 if (gameBoard[1][2].equals(" "))
                     gameBoard[1][2] = symbol;
-                else{
-                    System.out.print("Posição já escolhida, tente novamente: ");
-                    placePick(symbol, position, gameBoard);
-                }
                 break;
             case 7:
                 if (gameBoard[2][0].equals(" "))
                     gameBoard[2][0] = symbol;
-                else{
-                    System.out.print("Posição já escolhida, tente novamente: ");
-                    placePick(symbol, position, gameBoard);
-                }
                 break;
             case 8:
                 if (gameBoard[2][1].equals(" "))
                     gameBoard[2][1] = symbol;
-                else{
-                    System.out.print("Posição já escolhida, tente novamente: ");
-                    placePick(symbol, position, gameBoard);
-                }
                 break;
             case 9:
                 if (gameBoard[2][2].equals(" "))
                     gameBoard[2][2] = symbol;
-                else{
-                    System.out.print("Posição já escolhida, tente novamente: ");
-                    placePick(symbol, position, gameBoard);
-                }
                 break;
             default:
-                //no default, input mismatches were handled in the pickPosition method
+                //no default, input mismatches were handled in the play method
                 break;
         }
-
     }
 
     public static void clearConsole() {

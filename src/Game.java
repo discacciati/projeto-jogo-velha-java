@@ -27,7 +27,7 @@ public class Game {
                 }
                 if (endRound){
                     writeBoard(names, score, gameBoard);
-                    gameBoard = newGameBoard();  //reset gameBoard
+                    gameBoard = newGameBoard();
                     if (wishesToKeepPlaying()){
                         clearConsole();
                         instructions();
@@ -58,13 +58,13 @@ public class Game {
 
         String[] names = {"", ""};
         Scanner sc = new Scanner(System.in);
-        System.out.print("Digite o nome do jogador 1: ");
+        System.out.print("Digite o nome do jogador 1 : ");
         names[0]= sc.nextLine();
-        System.out.println("Bem-vinde "+ names[0] + ", você joga como \"X\"\n");
+        System.out.println("Bem-vindo "+ names[0] + ", você joga como \"X\"\n");
 
-        System.out.print("Digite o nome do jogador 2: ");
+        System.out.print("Digite o nome do jogador 2 : ");
         names[1] = sc.nextLine();
-        System.out.println("Bem-vinde "+ names[1] + ", você joga como \"O\"\n");
+        System.out.println("Bem-vindo "+ names[1] + ", você joga como \"O\"\n");
         //sc.close();
         return names;
     };
